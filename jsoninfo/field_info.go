@@ -22,6 +22,9 @@ type FieldInfo struct {
 
 func AppendFields(fields []FieldInfo, parentIndex []int, t reflect.Type) []FieldInfo {
 	// For each field
+	if t.Kind() != reflect.Struct {
+		return nil
+	}
 	numField := t.NumField()
 iteration:
 	for i := 0; i < numField; i++ {
