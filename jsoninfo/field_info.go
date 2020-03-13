@@ -34,13 +34,13 @@ iteration:
 		index = append(index, i)
 
 		// See whether this is an embedded field
-		if f.Anonymous {
-			if f.Tag.Get("json") == "-" {
-				continue
-			}
-			fields = AppendFields(fields, index, f.Type)
-			continue iteration
-		}
+		// if f.Anonymous {
+		// 	if f.Tag.Get("json") == "-" {
+		// 		continue
+		// 	}
+		// 	fields = AppendFields(fields, index, f.Type)
+		// 	continue iteration
+		// }
 
 		// Ignore certain types
 		switch f.Type.Kind() {
