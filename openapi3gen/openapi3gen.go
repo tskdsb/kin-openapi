@@ -3,6 +3,7 @@ package openapi3gen
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -34,6 +35,8 @@ type Generator struct {
 	// If count is 1, it's not ne
 	// An OpenAPI identifier has been assigned to each.
 	SchemaRefs map[*openapi3.SchemaRef]int
+
+	RegisteredType map[reflect.Type]*openapi3.SchemaRef
 }
 
 func NewGenerator() *Generator {
@@ -41,6 +44,10 @@ func NewGenerator() *Generator {
 		Types:      make(map[reflect.Type]*openapi3.SchemaRef),
 		SchemaRefs: make(map[*openapi3.SchemaRef]int),
 	}
+}
+func (g *Generator) LoadTypes(t map[reflect.Type]*openapi3.SchemaRef) *Generator {
+	g.RegisteredType = t
+	return g
 }
 
 func (g *Generator) GenerateSchemaRef(t reflect.Type) (*openapi3.SchemaRef, error) {
@@ -51,12 +58,23 @@ func (g *Generator) generateSchemaRefFor(parents []*jsoninfo.TypeInfo, t reflect
 	ref := g.Types[t]
 	if ref != nil {
 		g.SchemaRefs[ref]++
-		return ref, nil
+		for t.Kind() == reflect.Ptr {
+			t = t.Elem()
+		}
+		if t.Kind() == reflect.Struct {
+			return &openapi3.SchemaRef{
+				Ref: fmt.Sprintf("#/components/schemas/%s",
+					strings.ReplaceAll(t.String(), ".", "")),
+				Value: nil,
+			}, nil
+		}
+
 	}
 	ref, err := g.generateWithoutSaving(parents, t)
 	if ref != nil {
 		g.Types[t] = ref
 		g.SchemaRefs[ref]++
+		ref.Ref = ""
 	}
 	return ref, err
 }
