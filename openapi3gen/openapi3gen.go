@@ -66,7 +66,7 @@ func (g *Generator) generateWithoutSaving(parents []*jsoninfo.TypeInfo, t reflec
 	typeInfo := jsoninfo.GetTypeInfo(t)
 	for _, parent := range parents {
 		if parent == typeInfo {
-			return nil, &CycleError{}
+			return nil, nil
 		}
 	}
 
